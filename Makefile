@@ -1,16 +1,18 @@
-postgres:
-	docker run --name postgres12 -p 5434:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+DB_USER=root
+DB_PASSWORD=root
 
+mysql:
+	docker run --name mysql-simple-bank -p 3306:3306 -e MYSQL_ROOT_PASSWORD="${DB_PASSWORD}" -d mysql:8.0-debian
 create-db:
-	docker exec -it postgres12 createdb --username=root --owner=root simple_bank
+	docker exec -it mysql-simple-bank mysql --user="${DB_USER}" --password="${DB_PASSWORD}" -e 'create database simple_bank'
 
 drop-db:
-	docker exec -it postgres12 dropdb simple_bank
+	docker exec -it mysql-simple-bank mysql --user="${DB_USER}" --password="${DB_PASSWORD}" -e 'drop database simple_bank'
 
 migrate-up:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5434/simple_bank?sslmode=disable" -verbose up
+	migrate -path db/migration -database "mysql://root:root@tcp(localhost)/simple_bank" -verbose up
 
 migrate-down:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5434/simple_bank?sslmode=disable" -verbose down
+	migrate -path db/migration -database "mysql://root:root@tcp(localhost)/simple_bank" -verbose down
 
 .PHONY: postgres createdb dropdb
