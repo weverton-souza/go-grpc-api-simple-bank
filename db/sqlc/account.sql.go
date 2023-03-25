@@ -7,11 +7,11 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
-const createAccount = `-- name: CreateAccount :execresult
-INSERT INTO accounts (id, owner, balance, currency) VALUES (?, ?, ?, ?)
+const createAccount = `-- name: CreateAccount :exec
+INSERT INTO accounts (id, owner, balance, currency)
+VALUES (?, ?, ?, ?)
 `
 
 type CreateAccountParams struct {
@@ -21,11 +21,97 @@ type CreateAccountParams struct {
 	Currency string `json:"currency"`
 }
 
-func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createAccount,
+func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) error {
+	_, err := q.db.ExecContext(ctx, createAccount,
 		arg.ID,
 		arg.Owner,
 		arg.Balance,
 		arg.Currency,
 	)
+	return err
+}
+
+const deleteAccount = `-- name: DeleteAccount :exec
+DELETE FROM accounts WHERE id = ?
+`
+
+func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteAccount, id)
+	return err
+}
+
+const findAccountById = `-- name: FindAccountById :one
+SELECT id, owner, balance, currency, created_at FROM accounts acc
+WHERE acc.id = ? LIMIT 1
+`
+
+func (q *Queries) FindAccountById(ctx context.Context, id int64) (Account, error) {
+	row := q.db.QueryRowContext(ctx, findAccountById, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const findAllAccounts = `-- name: FindAllAccounts :many
+SELECT id, owner, balance, currency, created_at FROM accounts
+`
+
+func (q *Queries) FindAllAccounts(ctx context.Context) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, findAllAccounts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.Balance,
+			&i.Currency,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findLastInsertedId = `-- name: FindLastInsertedId :one
+SELECT LAST_INSERT_ID()
+`
+
+func (q *Queries) FindLastInsertedId(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, findLastInsertedId)
+	var last_insert_id int64
+	err := row.Scan(&last_insert_id)
+	return last_insert_id, err
+}
+
+const updateAccount = `-- name: UpdateAccount :exec
+UPDATE accounts SET balance = ? WHERE id = ?
+`
+
+type UpdateAccountParams struct {
+	Balance int64 `json:"balance"`
+	ID      int64 `json:"id"`
+}
+
+func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
+	_, err := q.db.ExecContext(ctx, updateAccount, arg.Balance, arg.ID)
+	return err
 }
