@@ -10,7 +10,7 @@ import (
 )
 
 const createAccount = `-- name: CreateAccount :exec
-INSERT INTO accounts (id, owner, balance, currency)
+INSERT INTO account (id, owner, balance, currency)
 VALUES (?, ?, ?, ?)
 `
 
@@ -32,7 +32,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) er
 }
 
 const deleteAccount = `-- name: DeleteAccount :exec
-DELETE FROM accounts WHERE id = ?
+DELETE FROM account WHERE id = ?
 `
 
 func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
@@ -41,7 +41,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 }
 
 const findAccountById = `-- name: FindAccountById :one
-SELECT id, owner, balance, currency, created_at FROM accounts acc
+SELECT id, owner, balance, currency, created_at FROM account acc
 WHERE acc.id = ? LIMIT 1
 `
 
@@ -59,7 +59,7 @@ func (q *Queries) FindAccountById(ctx context.Context, id int64) (Account, error
 }
 
 const findAllAccounts = `-- name: FindAllAccounts :many
-SELECT id, owner, balance, currency, created_at FROM accounts
+SELECT id, owner, balance, currency, created_at FROM account
 `
 
 func (q *Queries) FindAllAccounts(ctx context.Context) ([]Account, error) {
@@ -91,19 +91,19 @@ func (q *Queries) FindAllAccounts(ctx context.Context) ([]Account, error) {
 	return items, nil
 }
 
-const findLastInsertedId = `-- name: FindLastInsertedId :one
+const findLastAccountInsertedId = `-- name: FindLastAccountInsertedId :one
 SELECT LAST_INSERT_ID()
 `
 
-func (q *Queries) FindLastInsertedId(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, findLastInsertedId)
+func (q *Queries) FindLastAccountInsertedId(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, findLastAccountInsertedId)
 	var last_insert_id int64
 	err := row.Scan(&last_insert_id)
 	return last_insert_id, err
 }
 
 const updateAccount = `-- name: UpdateAccount :exec
-UPDATE accounts SET balance = ? WHERE id = ?
+UPDATE account SET balance = ? WHERE id = ?
 `
 
 type UpdateAccountParams struct {
