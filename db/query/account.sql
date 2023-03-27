@@ -1,19 +1,19 @@
 -- name: CreateAccount :exec
-INSERT INTO accounts (id, owner, balance, currency)
+INSERT INTO account (id, owner, balance, currency)
 VALUES (?, ?, ?, ?); commit;
 
--- name: FindLastInsertedId :one
+-- name: FindLastAccountInsertedId :one
 SELECT LAST_INSERT_ID();
 
 -- name: FindAccountById :one
-SELECT * FROM accounts acc
+SELECT * FROM account acc
 WHERE acc.id = ? LIMIT 1; commit;
 
 -- name: FindAllAccounts :many
-SELECT * FROM accounts;
+SELECT * FROM account;
 
 -- name: UpdateAccount :exec
-UPDATE accounts SET balance = ? WHERE id = ?; commit;
+UPDATE account SET balance = ? WHERE id = ?; commit;
 
 -- name: DeleteAccount :exec
-DELETE FROM accounts WHERE id = ?; commit;
+DELETE FROM account WHERE id = ?; commit;
