@@ -22,19 +22,20 @@ func TestQueries_WithTx(t *testing.T) {
 		}
 	}(tx)
 
-	account := CreateAccountParams{
-		Owner:    randomNOwner(1)[0],
-		Balance:  randomMoney(),
-		Currency: randomCurrency(),
+	accounts := GetNewRandomAccountParams(1)
+
+	for _, account := range accounts {
+		err := testQueries.CreateAccount(context.Background(), account)
+		require.NoError(t, err)
 	}
 
 	qtx := testQueries.WithTx(tx)
-	err = qtx.CreateAccount(context.Background(), account)
+	err = qtx.CreateAccount(context.Background(), accounts[0])
 	if err != nil {
 		log.Fatal("Cannot create a new account:", err)
 	}
 
-	lastInsertedId, err := qtx.FindLastInsertedId(context.Background())
+	lastInsertedId, err := qtx.FindLastAccountInsertedId(context.Background())
 	accountInserted, err := qtx.FindAccountById(context.Background(), lastInsertedId)
 
 	require.NoError(t, err)
@@ -43,7 +44,7 @@ func TestQueries_WithTx(t *testing.T) {
 	require.NotZero(t, accountInserted.CreatedAt)
 
 	require.NotEmpty(t, accountInserted)
-	require.Equal(t, account.Owner, accountInserted.Owner)
-	require.Equal(t, account.Balance, accountInserted.Balance)
-	require.Equal(t, account.Currency, accountInserted.Currency)
+	require.Equal(t, accounts[0].Owner, accountInserted.Owner)
+	require.Equal(t, accounts[0].Balance, accountInserted.Balance)
+	require.Equal(t, accounts[0].Currency, accountInserted.Currency)
 }
