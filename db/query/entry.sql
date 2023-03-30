@@ -2,9 +2,6 @@
 INSERT INTO entry (id, account_id, amount)
 VALUES (?, ?, ?); commit;
 
--- name: FindLastEntryInsertedId :one
-SELECT LAST_INSERT_ID();
-
 -- name: FindEntryById :one
 SELECT * FROM entry e
 WHERE e.id = ? LIMIT 1; commit;

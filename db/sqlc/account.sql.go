@@ -15,7 +15,7 @@ VALUES (?, ?, ?, ?)
 `
 
 type CreateAccountParams struct {
-	ID       int64  `json:"id"`
+	ID       string `json:"id"`
 	Owner    string `json:"owner"`
 	Balance  int64  `json:"balance"`
 	Currency string `json:"currency"`
@@ -35,7 +35,7 @@ const deleteAccount = `-- name: DeleteAccount :exec
 DELETE FROM account WHERE id = ?
 `
 
-func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
+func (q *Queries) DeleteAccount(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deleteAccount, id)
 	return err
 }
@@ -45,7 +45,7 @@ SELECT id, owner, balance, currency, created_at FROM account acc
 WHERE acc.id = ? LIMIT 1
 `
 
-func (q *Queries) FindAccountById(ctx context.Context, id int64) (Account, error) {
+func (q *Queries) FindAccountById(ctx context.Context, id string) (Account, error) {
 	row := q.db.QueryRowContext(ctx, findAccountById, id)
 	var i Account
 	err := row.Scan(
@@ -91,24 +91,13 @@ func (q *Queries) FindAllAccounts(ctx context.Context) ([]Account, error) {
 	return items, nil
 }
 
-const findLastAccountInsertedId = `-- name: FindLastAccountInsertedId :one
-SELECT LAST_INSERT_ID()
-`
-
-func (q *Queries) FindLastAccountInsertedId(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, findLastAccountInsertedId)
-	var last_insert_id int64
-	err := row.Scan(&last_insert_id)
-	return last_insert_id, err
-}
-
 const updateAccount = `-- name: UpdateAccount :exec
 UPDATE account SET balance = ? WHERE id = ?
 `
 
 type UpdateAccountParams struct {
-	Balance int64 `json:"balance"`
-	ID      int64 `json:"id"`
+	Balance int64  `json:"balance"`
+	ID      string `json:"id"`
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {

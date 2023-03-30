@@ -15,9 +15,9 @@ VALUES (?, ?, ?)
 `
 
 type CreateEntryParams struct {
-	ID        int64 `json:"id"`
-	AccountID int64 `json:"account_id"`
-	Amount    int64 `json:"amount"`
+	ID        string `json:"id"`
+	AccountID string `json:"account_id"`
+	Amount    int64  `json:"amount"`
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) error {
@@ -65,9 +65,9 @@ LIMIT ? OFFSET ?
 `
 
 type FindEntriesByAccountIdParams struct {
-	AccountID int64 `json:"account_id"`
-	Limit     int32 `json:"limit"`
-	Offset    int32 `json:"offset"`
+	AccountID string `json:"account_id"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
 }
 
 func (q *Queries) FindEntriesByAccountId(ctx context.Context, arg FindEntriesByAccountIdParams) ([]Entry, error) {
@@ -103,7 +103,7 @@ SELECT id, account_id, amount, created_at FROM entry e
 WHERE e.id = ? LIMIT 1
 `
 
-func (q *Queries) FindEntryById(ctx context.Context, id int64) (Entry, error) {
+func (q *Queries) FindEntryById(ctx context.Context, id string) (Entry, error) {
 	row := q.db.QueryRowContext(ctx, findEntryById, id)
 	var i Entry
 	err := row.Scan(
@@ -113,15 +113,4 @@ func (q *Queries) FindEntryById(ctx context.Context, id int64) (Entry, error) {
 		&i.CreatedAt,
 	)
 	return i, err
-}
-
-const findLastEntryInsertedId = `-- name: FindLastEntryInsertedId :one
-SELECT LAST_INSERT_ID()
-`
-
-func (q *Queries) FindLastEntryInsertedId(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, findLastEntryInsertedId)
-	var last_insert_id int64
-	err := row.Scan(&last_insert_id)
-	return last_insert_id, err
 }

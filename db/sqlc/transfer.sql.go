@@ -15,10 +15,10 @@ VALUES (?, ?, ?, ?)
 `
 
 type CreateTransferParams struct {
-	ID            int64 `json:"id"`
-	FromAccountID int64 `json:"from_account_id"`
-	ToAccountID   int64 `json:"to_account_id"`
-	Amount        int64 `json:"amount"`
+	ID            string `json:"id"`
+	FromAccountID string `json:"from_account_id"`
+	ToAccountID   string `json:"to_account_id"`
+	Amount        int64  `json:"amount"`
 }
 
 func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) error {
@@ -64,23 +64,12 @@ func (q *Queries) FindAllTransfers(ctx context.Context) ([]Transfer, error) {
 	return items, nil
 }
 
-const findLastTransferInsertedId = `-- name: FindLastTransferInsertedId :one
-SELECT LAST_INSERT_ID()
-`
-
-func (q *Queries) FindLastTransferInsertedId(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, findLastTransferInsertedId)
-	var last_insert_id int64
-	err := row.Scan(&last_insert_id)
-	return last_insert_id, err
-}
-
 const findTransferById = `-- name: FindTransferById :one
 SELECT id, from_account_id, to_account_id, amount, created_at FROM transfer e
 WHERE e.id = ? LIMIT 1
 `
 
-func (q *Queries) FindTransferById(ctx context.Context, id int64) (Transfer, error) {
+func (q *Queries) FindTransferById(ctx context.Context, id string) (Transfer, error) {
 	row := q.db.QueryRowContext(ctx, findTransferById, id)
 	var i Transfer
 	err := row.Scan(
@@ -102,10 +91,10 @@ LIMIT ? OFFSET ?
 `
 
 type FindTransfersByFromAccountIdAndToAccountIdParams struct {
-	FromAccountID int64 `json:"from_account_id"`
-	ToAccountID   int64 `json:"to_account_id"`
-	Limit         int32 `json:"limit"`
-	Offset        int32 `json:"offset"`
+	FromAccountID string `json:"from_account_id"`
+	ToAccountID   string `json:"to_account_id"`
+	Limit         int32  `json:"limit"`
+	Offset        int32  `json:"offset"`
 }
 
 func (q *Queries) FindTransfersByFromAccountIdAndToAccountId(ctx context.Context, arg FindTransfersByFromAccountIdAndToAccountIdParams) ([]Transfer, error) {

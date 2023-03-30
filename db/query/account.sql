@@ -2,9 +2,6 @@
 INSERT INTO account (id, owner, balance, currency)
 VALUES (?, ?, ?, ?); commit;
 
--- name: FindLastAccountInsertedId :one
-SELECT LAST_INSERT_ID();
-
 -- name: FindAccountById :one
 SELECT * FROM account acc
 WHERE acc.id = ? LIMIT 1; commit;

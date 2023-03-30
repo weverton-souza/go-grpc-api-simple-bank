@@ -1,5 +1,5 @@
 CREATE TABLE `account` (
-    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `id`  varchar(37) primary key,
     `owner` varchar(255) NOT NULL,
     `balance` bigint NOT NULL,
     `currency` varchar(255) NOT NULL,
@@ -7,16 +7,16 @@ CREATE TABLE `account` (
 );
 
 CREATE TABLE `entry` (
-    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
-    `account_id` bigint NOT NULL,
+    `id` varchar(37) primary key,
+    `account_id` varchar(37) NOT NULL,
     `amount` bigint NOT NULL COMMENT 'can be negative or positive',
     `created_at` timestamp default current_timestamp
 );
 
 CREATE TABLE `transfer` (
-    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
-    `from_account_id` bigint NOT NULL,
-    `to_account_id` bigint NOT NULL,
+    `id` varchar(37) primary key,
+    `from_account_id` varchar(37) NOT NULL,
+    `to_account_id` varchar(37) NOT NULL,
     `amount` bigint NOT NULL COMMENT 'must be positive',
     `created_at` timestamp default current_timestamp
 );

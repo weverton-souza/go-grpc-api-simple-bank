@@ -24,19 +24,13 @@ func TestQueries_WithTx(t *testing.T) {
 
 	accounts := GetNewRandomAccountParams(1)
 
-	for _, account := range accounts {
-		err := testQueries.CreateAccount(context.Background(), account)
-		require.NoError(t, err)
-	}
-
 	qtx := testQueries.WithTx(tx)
 	err = qtx.CreateAccount(context.Background(), accounts[0])
 	if err != nil {
 		log.Fatal("Cannot create a new account:", err)
 	}
 
-	lastInsertedId, err := qtx.FindLastAccountInsertedId(context.Background())
-	accountInserted, err := qtx.FindAccountById(context.Background(), lastInsertedId)
+	accountInserted, err := qtx.FindAccountById(context.Background(), accounts[0].ID)
 
 	require.NoError(t, err)
 

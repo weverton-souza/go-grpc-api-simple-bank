@@ -2,9 +2,6 @@
 INSERT INTO transfer (id, from_account_id, to_account_id, amount)
 VALUES (?, ?, ?, ?); commit;
 
--- name: FindLastTransferInsertedId :one
-SELECT LAST_INSERT_ID();
-
 -- name: FindTransferById :one
 SELECT * FROM transfer e
 WHERE e.id = ? LIMIT 1; commit;

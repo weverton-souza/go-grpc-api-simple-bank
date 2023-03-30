@@ -2,28 +2,25 @@ package db
 
 import (
 	"context"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestQueries_CreateEntry_FindEntryById_FindLastEntryInsertedId(t *testing.T) {
 	accounts := GetNewRandomAccountParams(1)
-	ids := make([]int64, 0)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
-		lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-		ids = append(ids, lastInsertedId)
 	}
 
-	entry := CreateEntryParams{AccountID: ids[0], Amount: 500}
+	entry := CreateEntryParams{ID: uuid.NewV4().String(), AccountID: accounts[0].ID, Amount: 500}
 
 	err := testQueries.CreateEntry(context.Background(), entry)
 	require.NoError(t, err)
 
-	lastInsertedId, err := testQueries.FindLastEntryInsertedId(context.Background())
-	entryInserted, err := testQueries.FindEntryById(context.Background(), lastInsertedId)
+	entryInserted, err := testQueries.FindEntryById(context.Background(), entry.ID)
 	require.NoError(t, err)
 
 	require.NotZero(t, entryInserted.ID)
@@ -36,17 +33,16 @@ func TestQueries_CreateEntry_FindEntryById_FindLastEntryInsertedId(t *testing.T)
 
 func TestQueries_FindAllEntries(t *testing.T) {
 	accounts := GetNewRandomAccountParams(2)
-	ids := make([]int64, 0)
+	ids := make([]string, 0)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
-		lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-		ids = append(ids, lastInsertedId)
+		ids = append(ids, account.ID)
 	}
 
-	entry1 := CreateEntryParams{AccountID: ids[0], Amount: 500}
-	entry2 := CreateEntryParams{AccountID: ids[0], Amount: 500}
+	entry1 := CreateEntryParams{ID: uuid.NewV4().String(), AccountID: ids[0], Amount: 500}
+	entry2 := CreateEntryParams{ID: uuid.NewV4().String(), AccountID: ids[1], Amount: 500}
 
 	err := testQueries.CreateEntry(context.Background(), entry1)
 	require.NoError(t, err)
@@ -62,17 +58,14 @@ func TestQueries_FindAllEntries(t *testing.T) {
 
 func TestQueries_FindEntriesByAccountId(t *testing.T) {
 	accounts := GetNewRandomAccountParams(1)
-	ids := make([]int64, 0)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
-		lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-		ids = append(ids, lastInsertedId)
 	}
 
-	entry1 := CreateEntryParams{AccountID: ids[0], Amount: 150}
-	entry2 := CreateEntryParams{AccountID: ids[0], Amount: 897}
+	entry1 := CreateEntryParams{ID: uuid.NewV4().String(), AccountID: accounts[0].ID, Amount: 150}
+	entry2 := CreateEntryParams{ID: uuid.NewV4().String(), AccountID: accounts[0].ID, Amount: 897}
 
 	err := testQueries.CreateEntry(context.Background(), entry1)
 	require.NoError(t, err)
@@ -80,7 +73,7 @@ func TestQueries_FindEntriesByAccountId(t *testing.T) {
 	err = testQueries.CreateEntry(context.Background(), entry2)
 	require.NoError(t, err)
 
-	args := FindEntriesByAccountIdParams{AccountID: ids[0], Limit: 100, Offset: 0}
+	args := FindEntriesByAccountIdParams{AccountID: accounts[0].ID, Limit: 100, Offset: 0}
 
 	accs, err := testQueries.FindEntriesByAccountId(context.Background(), args)
 	require.NoError(t, err)

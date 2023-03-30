@@ -20,8 +20,7 @@ func TestQueries_CreateAccount_and_FindLastInsertedId_and_FindAccountById(t *tes
 		require.NoError(t, err)
 	}
 
-	lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-	accountInserted, err := testQueries.FindAccountById(context.Background(), lastInsertedId)
+	accountInserted, err := testQueries.FindAccountById(context.Background(), accounts[0].ID)
 
 	require.NoError(t, err)
 
@@ -42,16 +41,15 @@ func TestQueries_UpdateAccount(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-	accountInserted, err := testQueries.FindAccountById(context.Background(), lastInsertedId)
+	accountInserted, err := testQueries.FindAccountById(context.Background(), accounts[0].ID)
 	require.NoError(t, err)
 
-	updateAccountParams := UpdateAccountParams{ID: lastInsertedId, Balance: int64(rand.Intn(10000-0) + 0)}
+	updateAccountParams := UpdateAccountParams{ID: accounts[0].ID, Balance: int64(rand.Intn(10000-0) + 0)}
 
 	err = testQueries.UpdateAccount(context.Background(), updateAccountParams)
 	require.NoError(t, err)
 
-	accountUpdated, err := testQueries.FindAccountById(context.Background(), lastInsertedId)
+	accountUpdated, err := testQueries.FindAccountById(context.Background(), accounts[0].ID)
 	require.NoError(t, err)
 
 	require.NotZero(t, accountInserted.ID)
@@ -79,21 +77,20 @@ func TestQueries_FindAllAccounts(t *testing.T) {
 }
 
 func TestQueries_DeleteAccount(t *testing.T) {
-	accounts := GetNewRandomAccountParams(3)
+	accounts := GetNewRandomAccountParams(1)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
 	}
 
-	lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-	accountInserted, err := testQueries.FindAccountById(context.Background(), lastInsertedId)
+	accountInserted, err := testQueries.FindAccountById(context.Background(), accounts[0].ID)
 	require.NoError(t, err)
 
-	err = testQueries.DeleteAccount(context.Background(), lastInsertedId)
+	err = testQueries.DeleteAccount(context.Background(), accounts[0].ID)
 	require.NoError(t, err)
 
-	accountDeleted, err := testQueries.FindAccountById(context.Background(), lastInsertedId)
+	accountDeleted, err := testQueries.FindAccountById(context.Background(), accounts[0].ID)
 	require.Error(t, err)
 
 	require.NotZero(t, accountInserted.ID)

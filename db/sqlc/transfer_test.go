@@ -2,32 +2,30 @@ package db
 
 import (
 	"context"
+	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestQueries_CreateTransfer_FindTransferById_FindLastTransferInsertedId(t *testing.T) {
 	accounts := GetNewRandomAccountParams(2)
-	ids := make([]int64, 0)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
-		lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-		ids = append(ids, lastInsertedId)
 	}
 
 	transferParams := CreateTransferParams{
-		FromAccountID: ids[0],
-		ToAccountID:   ids[1],
+		ID:            uuid.NewV4().String(),
+		FromAccountID: accounts[0].ID,
+		ToAccountID:   accounts[1].ID,
 		Amount:        50,
 	}
 
 	err := testQueries.CreateTransfer(context.Background(), transferParams)
 	require.NoError(t, err)
 
-	lastInsertedId, err := testQueries.FindLastTransferInsertedId(context.Background())
-	transferInserted, err := testQueries.FindTransferById(context.Background(), lastInsertedId)
+	transferInserted, err := testQueries.FindTransferById(context.Background(), transferParams.ID)
 	require.NoError(t, err)
 
 	require.NotZero(t, transferInserted.ID)
@@ -41,24 +39,23 @@ func TestQueries_CreateTransfer_FindTransferById_FindLastTransferInsertedId(t *t
 
 func TestQueries_FindAllTransfers(t *testing.T) {
 	accounts := GetNewRandomAccountParams(2)
-	ids := make([]int64, 0)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
-		lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-		ids = append(ids, lastInsertedId)
 	}
 
 	transferParams1 := CreateTransferParams{
-		FromAccountID: ids[0],
-		ToAccountID:   ids[1],
+		ID:            uuid.NewV4().String(),
+		FromAccountID: accounts[0].ID,
+		ToAccountID:   accounts[1].ID,
 		Amount:        50,
 	}
 
 	transferParams2 := CreateTransferParams{
-		FromAccountID: ids[1],
-		ToAccountID:   ids[0],
+		ID:            uuid.NewV4().String(),
+		FromAccountID: accounts[1].ID,
+		ToAccountID:   accounts[0].ID,
 		Amount:        40,
 	}
 
@@ -76,24 +73,23 @@ func TestQueries_FindAllTransfers(t *testing.T) {
 
 func TestQueries_FindTransfersByFromAccountIdAndToAccountId(t *testing.T) {
 	accounts := GetNewRandomAccountParams(2)
-	ids := make([]int64, 0)
 
 	for _, account := range accounts {
 		err := testQueries.CreateAccount(context.Background(), account)
 		require.NoError(t, err)
-		lastInsertedId, err := testQueries.FindLastAccountInsertedId(context.Background())
-		ids = append(ids, lastInsertedId)
 	}
 
 	transferParams1 := CreateTransferParams{
-		FromAccountID: ids[0],
-		ToAccountID:   ids[1],
+		ID:            uuid.NewV4().String(),
+		FromAccountID: accounts[0].ID,
+		ToAccountID:   accounts[1].ID,
 		Amount:        50,
 	}
 
 	transferParams2 := CreateTransferParams{
-		FromAccountID: ids[1],
-		ToAccountID:   ids[0],
+		ID:            uuid.NewV4().String(),
+		FromAccountID: accounts[1].ID,
+		ToAccountID:   accounts[0].ID,
 		Amount:        40,
 	}
 
@@ -104,8 +100,8 @@ func TestQueries_FindTransfersByFromAccountIdAndToAccountId(t *testing.T) {
 	require.NoError(t, err)
 
 	args := FindTransfersByFromAccountIdAndToAccountIdParams{
-		FromAccountID: ids[0],
-		ToAccountID:   ids[1],
+		FromAccountID: accounts[0].ID,
+		ToAccountID:   accounts[1].ID,
 		Limit:         5,
 		Offset:        0,
 	}

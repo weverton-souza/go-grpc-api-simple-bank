@@ -2,6 +2,7 @@ package db
 
 import (
 	"bufio"
+	"github.com/satori/go.uuid"
 	"log"
 	"math/rand"
 	"os"
@@ -14,6 +15,7 @@ func GetNewRandomAccountParams(n int) []CreateAccountParams {
 
 	for i := 0; i < n; i++ {
 		accounts = append(accounts, CreateAccountParams{
+			ID:       uuid.NewV4().String(),
 			Owner:    randomNOwner(currentDir),
 			Balance:  randomMoney(),
 			Currency: randomCurrency(),
@@ -53,7 +55,7 @@ func readFileLines(dir, fileName string) (lines []string) {
 }
 
 func randomMoney() int64 {
-	return int64(rand.Intn(10000-0) + 0)
+	return int64(rand.Intn(10000-100) + 100)
 }
 
 func randomCurrency() string {
